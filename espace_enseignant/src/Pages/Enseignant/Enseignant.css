@@ -1,0 +1,8 @@
+.main-content {
+    transition: margin-left 0.3s ease; /* Smooth transition for content shift */
+    margin-left: 250px; /* Default state, sidebar visible */
+}
+
+.sidebar-hidden {
+    margin-left: 0; /* Adjust content margin when sidebar is hidden */
+}
