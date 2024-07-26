@@ -1,8 +1,8 @@
 import React from 'react';
 import Semestre1 from '../../assets/one.png'
 import Semestre2 from '../../assets/two.png'
-import './Cours.css';
-const Cour = [
+import './Semestre.css';
+const semestre1_2 = [
     {
         icon: Semestre1,
         title: 'Semestre 1',
@@ -12,11 +12,11 @@ const Cour = [
         title: 'Semestre 2',
     },
 ];
-const Cours = () => {
+const Semestre = () => {
         return (
             <div className="semestre-container">
                 
-                {Cour.map((semestre, index) => (
+                {semestre1_2.map((semestre, index) => (
                     <div key={index} className="semestre">
                         <img src={semestre.icon} alt="" className="semestre-icon" width={100} />
                         <h3><a href={`/${semestre.title.toLowerCase().replace(/ /g, '-')}`}>{semestre.title}</a></h3>
@@ -26,4 +26,4 @@ const Cours = () => {
         );
     };
 
-export default Cours;
+export default Semestre;

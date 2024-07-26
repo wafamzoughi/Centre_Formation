@@ -1,32 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Cours from '../../assets/lesson.png';
-import Devoirs from '../../assets/examen.png';
-import Presences from '../../assets/absence.png';
-import Notes from '../../assets/note.png';
 import './Accueil.css';
-
-// Sample static data for illustration
-const accueil = [
-    {   
-        icon: Cours,
-        title: 'Cours',
-    },
-    {
-        icon: Devoirs,
-        title: 'Devoirs',
-    },
-    {
-        icon: Presences,
-        title: 'Présences',
-    },
-    {
-        icon: Notes,
-        title: 'Notes',
-    },
-];
-
 const Accueil = () => {
     const [matieres, setMatieres] = useState([]);
 
@@ -54,19 +29,27 @@ const Accueil = () => {
                     </Link>
                 ))}
             </div>
-            <div className="accueil-content">
-                <div className="tache-container">
-                    {accueil.map((tache, index) => (
-                        <div key={index} className="tache">
-                            <img src={tache.icon} alt={tache.title} className="tache-icon" width={100} />
-                            <h3>
-                                <Link to={`/${tache.title.toLowerCase().replace(/ /g, '-')}`} className="tache-link">
-                                    {tache.title}
-                                </Link>
-                            </h3>
-                        </div>
-                    ))}
+            <div className='loginsignup'>
+            <div className="loginsignup-container"> 
+                <h1>Se connecter / inscription</h1>
+                <div className="loginsignup-form">
+                    <input name='username'  type="text" placeholder="Votre Nom"/>
+                    <input type="email" name='email'  placeholder="Votre Email"/>
+                    <div><input type="password" name='password'   placeholder="Votre Mot de Passe"/>
+                    
+                    </div>
                 </div>
+                <Link to="/semestre">
+                        <button>Connexion</button>
+                    </Link>
+                <p className="loginsignup-login">Vous avez déjà un compte ? <span >Connectez-vous ici</span></p>
+                <p className="loginsignup-login">Créer un compte ? <span >Cliquez ici</span></p>
+                
+                <div className="loginsignup-agree">
+                    <input type="checkbox" name='' id=''/>
+                    <p>En continuant, j'accepte les conditions d'utilisation et la politique de confidentialité.</p>
+                </div>
+            </div>
             </div>
         </div>
     );
