@@ -20,6 +20,7 @@ const Sidebar1 = () => {
                     <p>Semestre 1</p>
                 </div>
             </Link>
+        
             <Link to={'/cours'} style={{textDecoration:"none"}}>
                 <div className="sidebar-item">
                 <img  src={cours} alt="" width="35" className="image" />
@@ -52,8 +53,9 @@ const Sidebar1 = () => {
                     <p>Semestre 2</p>
                 </div>
             </Link>
+            </div>
             
-        </div>
+        
     )
 }
 export default Sidebar1

@@ -34,7 +34,7 @@ const Semestre1 = () => {
     };
 
     return (
-        <div className="semestre-wrapper">
+        <div className="semestrewrapper">
             <img src={menuIcon} alt="menu icon" className="menu-icon" onClick={toggleSidebar} />
             <div className={`sidebar ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
                 <Sidebar />

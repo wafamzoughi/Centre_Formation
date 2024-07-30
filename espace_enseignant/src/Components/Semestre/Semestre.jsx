@@ -14,7 +14,7 @@ const semestre1_2 = [
 ];
 const Semestre = () => {
         return (
-            <div className="semestre-container">
+            <div className="semestrecontainer">
                 
                 {semestre1_2.map((semestre, index) => (
                     <div key={index} className="semestre">

@@ -13,11 +13,12 @@
     align-items:flex-start;
     justify-content: flex-start;
     margin: 0px 10px;
-    padding: 2px 10px;
+    padding: 0px 10px;
     border-radius: 6px;
     background-color: rgb(253, 253, 249);
     gap: 20px;
     cursor: pointer;
+    
 }
 .image{
     
@@ -36,3 +37,4 @@
         margin: 0;
     }
 }
+

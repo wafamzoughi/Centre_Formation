@@ -27,6 +27,39 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+// Schema et modèle pour Chapitre
+const Chapitre = mongoose.model("Chapitre", {
+    num_chap: { type: Number, required: true },
+    nom_chap: { type: String, required: true },
+    cours_pdf: { type: String },
+    nom_matiere: { type: String, required: true },
+});
+
+// API pour ajouter un chapitre
+app.post('/ajouterchapitre', upload.single('cours_pdf'), async (req, res) => {
+    const { num_chap, nom_chap, nom_matiere } = req.body;
+    const cours_pdf = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const chapitre = new Chapitre({
+        num_chap,
+        nom_chap,
+        cours_pdf,
+        nom_matiere,
+    });
+
+    try {
+        await chapitre.save();
+        res.json(chapitre);
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur lors de l\'ajout du chapitre' });
+    }
+});
+// API pour obtenir tous les chapitres
+app.get('/tousleschapitres', async (req, res) => {
+    let chapitres = await Chapitre.find({});
+    res.send(chapitres);
+});
+
 
 // Schema et modèle pour Eleve
 const Eleve = mongoose.model("Eleve", {
@@ -42,8 +75,6 @@ const Eleve = mongoose.model("Eleve", {
     remise: { type: Number, default: 0 },
     date: { type: Date, default: Date.now },
 });
-
-
 // API pour ajouter un élève
 app.post('/ajoutereleve', async (req, res) => {
     let eleves = await Eleve.find({});
@@ -86,7 +117,6 @@ app.put('/modifiereleve/:id', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'élève' });
     }
 });
-
 // API pour supprimer un élève
 app.post('/supprimereleve', async (req, res) => {
     try {
@@ -96,12 +126,13 @@ app.post('/supprimereleve', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la suppression d eleve-' });
     }
 });
-
 // API pour obtenir tous les élèves
 app.get('/tousleseleves', async (req, res) => {
     let eleves = await Eleve.find({});
     res.send(eleves);
 });
+
+
 
 const EnseignantSchema = new mongoose.Schema({
     nom: { type: String, required: true },
@@ -349,26 +380,6 @@ app.get('/touslesmatieres', async (req, res) => {
     res.send(matieres);
 });
 
-// Routes pour les fichiers
-app.post('/upload/s1', upload.fields([
-    { name: 'pdf', maxCount: 1 },
-    { name: 'video', maxCount: 1 }
-]), (req, res) => {
-    res.json({
-        message: 'Fichiers pour S1 téléchargés avec succès!',
-        files: req.files
-    });
-});
-
-app.post('/upload/s2', upload.fields([
-    { name: 'pdf', maxCount: 1 },
-    { name: 'video', maxCount: 1 }
-]), (req, res) => {
-    res.json({
-        message: 'Fichiers pour S2 téléchargés avec succès!',
-        files: req.files
-    });
-});
 
 
 

@@ -1,6 +1,6 @@
 .semestre-wrapper {
     display: flex;
-    position: relative;
+    margin-left: -245px;
 }
 
 .menu-icon {
@@ -20,9 +20,7 @@
     width: 250px;
     background-color: white;
     transition: transform 0.3s ease;
-    
-    margin-top: 25px;
-    
+    margin-top: 10px;
 }
 
 .sidebar-hidden {
@@ -33,19 +31,21 @@
     transform: translateX(0);
 }
 
-
-
-.sidebar-visible  {
-    margin-left: 0px; /* Adjust as per your sidebar width */
-}
-.main-content {
-    flex: 3;
+.cours-form {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    margin-top: 50px;
-    margin-left: 120px;
-    text-align: center;
+    transition: margin-left 0.3s ease;
+    margin-top: 100px;
+    margin-right: 5px;
+}
+
+.sidebar-visible + .cours-form {
+    margin-left: 250px; /* Adjust as per your sidebar width */
+}
+
+.sidebar-hidden + .cours-form {
+    margin-left: 0;
 }
 
 .header {
@@ -101,3 +101,65 @@ h2, h3 {
 p {
     margin: 0 0 10px 0;
 }
+
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="file"],
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 50%;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+.published-chapters h3{
+    width: 50px;
+    color:brown ;
+}
+.published-chapters h2 {
+    color: #555;
+    text-decoration: underline;
+}
+

@@ -1,6 +1,7 @@
-.semestre-wrapper {
+.semestrewrapper {
     display: flex;
-    position: relative;
+    
+    margin-left: 0px;
 }
 
 .menu-icon {
@@ -20,8 +21,8 @@
     width: 250px;
     background-color: white;
     transition: transform 0.3s ease;
-    
     margin-top: 40px;
+    
     
 }
 

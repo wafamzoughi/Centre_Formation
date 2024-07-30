@@ -29,29 +29,22 @@ const Accueil = () => {
                     </Link>
                 ))}
             </div>
-            <div className='loginsignup'>
-            <div className="loginsignup-container"> 
-                <h1>Se connecter / inscription</h1>
-                <div className="loginsignup-form">
-                    <input name='username'  type="text" placeholder="Votre Nom"/>
+            <div className='login'>
+            <div className="login-container"> 
+                <h1>Se connecter</h1>
+                <div className="login-form">
                     <input type="email" name='email'  placeholder="Votre Email"/>
-                    <div><input type="password" name='password'   placeholder="Votre Mot de Passe"/>
+                    <input type="password" name='password'   placeholder="Votre Mot de Passe"/>
                     
-                    </div>
                 </div>
                 <Link to="/semestre">
-                        <button>Connexion</button>
-                    </Link>
-                <p className="loginsignup-login">Vous avez déjà un compte ? <span >Connectez-vous ici</span></p>
-                <p className="loginsignup-login">Créer un compte ? <span >Cliquez ici</span></p>
-                
-                <div className="loginsignup-agree">
-                    <input type="checkbox" name='' id=''/>
-                    <p>En continuant, j'accepte les conditions d'utilisation et la politique de confidentialité.</p>
-                </div>
+                    <button>Connexion</button>
+                </Link>
             </div>
+                
             </div>
         </div>
+        
     );
 };
 
