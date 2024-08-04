@@ -48,10 +48,10 @@ const Sidebar = () => {
                     <p>Notes</p>
                 </div>
             </Link>
-            <Link to={'/Absences'} style={{textDecoration:"none"}}>
+            <Link to={'/Presences'} style={{textDecoration:"none"}}>
                 <div className="sidebar-item">
                 <img src={absence} alt="" width="35" />   
-                    <p>Absences</p>
+                    <p>Présences</p>
                 </div>
             </Link>
         </div>

@@ -15,14 +15,18 @@ const Eleves = () => {
         email: '',
         tel: '',
         adresse: '',
+        formations: [] ,
         montantPayant: '',
         montantRestant: '',
-        remise: ''
+        remise: '',
+        // Ajouter le champ formations
     });
     const [tableData, setTableData] = useState([]);
+    const [formations, setFormations] = useState([]); // Liste des formations disponibles
 
     useEffect(() => {
         fetchEleves();
+        fetchFormations(); // Charger les formations disponibles
     }, []);
 
     const fetchEleves = async () => {
@@ -34,11 +38,32 @@ const Eleves = () => {
         }
     };
 
+    const fetchFormations = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/touteslesformations');
+            console.log('Formations récupérées:', response.data); // Ajoutez cette ligne
+            setFormations(response.data || []);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des formations', error);
+        }
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
             [name]: value
+        });
+    };
+
+    const handleFormationsChange = (e) => {
+        const { options } = e.target;
+        const selectedFormations = Array.from(options)
+            .filter(option => option.selected)
+            .map(option => option.value);
+        setFormData({
+            ...formData,
+            formations: selectedFormations
         });
     };
 
@@ -82,9 +107,11 @@ const Eleves = () => {
             email: '',
             tel: '',
             adresse: '',
+            formations: [],
             montantPayant: '',
             montantRestant: '',
-            remise: ''
+            remise: '',
+            
         });
         setFormVisible(false);
         setIsEditing(false);
@@ -108,9 +135,11 @@ const Eleves = () => {
             email: eleve.email,
             tel: eleve.tel,
             adresse: eleve.adresse,
+            formations: eleve.formations.map(f => f._id),
             montantPayant: eleve.montantPayant,
             montantRestant: eleve.montantRestant,
-            remise: eleve.remise
+            remise: eleve.remise,
+            
         });
         setFormVisible(true);
         setIsEditing(true);
@@ -188,6 +217,23 @@ const Eleves = () => {
                         />
                     </div>
                     <div>
+                        <label>Formations:</label>
+                        <select
+                            name="formations"
+                            value={formData.formations}
+                            onChange={handleFormationsChange}
+                            required
+                            
+                        >
+                            {(formations ?? []).map((formation) => (
+                                <option key={formation._id} value={formation._id}>
+                                    {formation.nom}
+                                </option>
+                            ))}
+                        </select>
+                        
+                    </div>
+                    <div>
                         <label>Montant Payant:</label>
                         <input
                             type="text"
@@ -218,6 +264,7 @@ const Eleves = () => {
                             disabled={isEditing}
                         />
                     </div>
+                    
                     <button type="submit">{isEditing ? 'Mettre à jour' : 'Enregistrer'}</button>
                 </form>
             )}
@@ -230,9 +277,11 @@ const Eleves = () => {
                         <th>Email</th>
                         <th>Téléphone</th>
                         <th>Adresse</th>
+                        <th>Formations</th>
                         <th>Montant Payant (DT)</th>
                         <th>Montant Restant (DT)</th>
                         <th>Remise (%)</th>
+                        
                         <th></th>
                     </tr>
                 </thead>
@@ -245,9 +294,11 @@ const Eleves = () => {
                             <td>{item.email}</td>
                             <td>{item.tel}</td>
                             <td>{item.adresse}</td>
+                            <td>{(item.formations ?? []).map(f => f.nom).join(', ')}</td>
                             <td>{item.montantPayant}</td>
                             <td>{item.montantRestant}</td>
                             <td>{item.remise}</td>
+                            
                             <td className='icon-container'>
                                 <img
                                     onClick={() => suppEleve(item._id)}

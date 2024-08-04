@@ -13,6 +13,7 @@ import BanqueFinanceImmobilier from "../../Components/Formations/banque-finance-
 import InformatiqueWeb from "../../Components/Formations/InformatiqueWeb/InformatiqueWeb";
 import GraphismeWebdesign from "../../Components/Formations/GraphismeWebdesign/GraphismeWebdesign";
 import LanguesEtrangeres from "../../Components/Formations/LanguesEtrangeres/LanguesEtrangeres";
+import PresencesEleves from "../../Components/PresencesEleves/PresencesEleves";
 
 
 const Administration = () => {
@@ -27,7 +28,7 @@ const Administration = () => {
                     <Route path="/Personnels" element={<Personnels />}/>
                     <Route path="/Enseignants"  element={<Enseignants />}/>
                     <Route path="/Notes" />
-                    <Route path="/Absences"  />
+                    <Route path="/Presences" element={<PresencesEleves/>}  />
                     <Route path="/ressources-humaines"  element={<Ressourceshumaines />} />
                     <Route path="/marketing-&-communication"  element={<MarketingCommunication />} />
                     <Route path="/business-&-management"  element={<BusinessManagement />} />
