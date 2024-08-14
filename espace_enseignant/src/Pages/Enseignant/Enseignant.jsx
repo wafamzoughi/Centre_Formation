@@ -7,6 +7,7 @@ import Semestre from "../../Components/Semestre/Semestre";
 import Cours from "../../Components/Semestre/Semestre1/Cours/Cours";
 import Devoirs from "../../Components/Semestre/Semestre1/Devoirs/Devoirs";
 import Presence from "../../Components/Semestre/Semestre1/Presences/Presences";
+import Notes from "../../Components/Semestre/Semestre1/Notes/Notes";
 
 const Enseignant = () => {
     return (
@@ -14,10 +15,11 @@ const Enseignant = () => {
             <div className="main-content">
                 <Routes>
                     <Route path="/" element={<Accueil />} />
+                    <Route path="/matierecourrent/:matiere" element={<Accueil />} />
                     <Route path="/cours" element={<Cours/> } />
                     <Route path="/devoirs" element={<Devoirs/> } />
-                    <Route path="/presences" element={<Presence/>}/>
-                    <Route path="/notes" />
+                    <Route path="/présences" element={<Presence/>}/>
+                    <Route path="/notes" element={<Notes/>} />
                     <Route path="/semestre-1" element={<Semestre1 />} />
                     <Route path="/semestre" element={<Semestre/>}/>
                     

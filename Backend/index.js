@@ -5,7 +5,8 @@ const mongoose = require("mongoose");
 const cors = require('cors');
 const multer = require("multer");
 const path = require('path');
-
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 app.use(express.json());
 app.use(cors());
 
@@ -15,7 +16,77 @@ const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'Erreur de connexion à la base de données :'));
 db.once('open', () => {
-  console.log('Connexion à la base de données établie avec succès');
+    console.log('Connexion à la base de données établie avec succès');
+});
+
+app.post('/login', async (req, res) => {
+    const { email, cin, matiere } = req.body;
+    console.log(`Received login request: email=${email}, cin=${cin}, matiere=${matiere}`);
+    
+    try {
+        const enseignant = await Enseignant.findOne({ email });
+        console.log(`Enseignant found: ${enseignant}`);
+        
+        if (!enseignant) {
+            return res.status(401).json({ error: 'Email ou CIN incorrect' });
+        }
+
+        // Convert both cin values to string and trim
+        const cinInput = String(cin).trim();
+        const cinStored = String(enseignant.cin).trim();
+        
+        console.log(`cin Input: ${cinInput}, cin Stored: ${cinStored}`);
+        const isMatch = cinInput === cinStored;
+        console.log(`cin match: ${isMatch}`);
+        
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Email ou CIN incorrect' });
+        }
+
+        if (enseignant.specialite !== matiere) {
+            return res.status(403).json({ error: 'Matière incorrecte pour cet enseignant' });
+        }
+
+        const token = jwt.sign(
+            { id: enseignant._id, email: enseignant.email, matieres: enseignant.specialite },
+            'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token, success: true });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Erreur lors de la connexion' });
+    }
+});
+
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ error: 'Token non fourni' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret'); // Utilisez la même clé secrète que lors de la génération du token
+        req.user = decoded; // attachez les infos de l'utilisateur à la requête
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Token invalide' });
+    }
+};
+app.get('/utilisateur', authMiddleware, async (req, res) => {
+    try {
+        // req.user contient les informations décodées du token
+        const utilisateur = await Enseignant.findById(req.user.id).select('-cin -password'); // Exclure les champs sensibles
+        if (!utilisateur) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        }
+
+        res.json(utilisateur);
+    } catch (error) {
+        console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Configuration de Multer pour le stockage des fichiers
@@ -54,10 +125,20 @@ const Eleve = mongoose.model("Eleve", {
     formations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Formation' }],
     montantPayant: Number,
     montantRestant: Number,
-    remise: Number
+    remise: Number,
+    notes: [
+        {
+            formation: { type: mongoose.Schema.Types.ObjectId, ref: 'Formation' },
+            matiere: { type: mongoose.Schema.Types.ObjectId, ref: 'Matiere' },
+            ds: { type: Number, default: 0 },
+            examen: { type: Number, default: 0 },
+            tp: { type: Number, default: 0 }
+        }
+    ]
+    
 });
 
-const EnseignantSchema = new mongoose.Schema({
+const Enseignant = mongoose.model("Enseignant",{
     nom: { type: String, required: true },
     prenom: { type: String, required: true },
     cin: { type: Number, required: true },
@@ -69,7 +150,7 @@ const EnseignantSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
 });
 
-const Enseignant = mongoose.model("Enseignant", EnseignantSchema);
+
 
 const Personnel = mongoose.model("Personnel", {
     _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
@@ -84,15 +165,7 @@ const Personnel = mongoose.model("Personnel", {
     date: { type: Date, default: Date.now },
 });
 
-const Matiere = mongoose.model("Matiere", {
-    id: { type: Number, required: true },
-    matiere: { type: String, required: true },
-    coefficient: { type: Number, required: true },
-    credits: { type: Number, required: true },
-    heure: { type: Number, required: true },
-    formation: { type: String, enum: ['Ressources humaines', 'Marketing & Communication', 'Business & Management', 'Banque, Finance & Immobilier', 'Informatique & Web','Langues Étrangères', 'Graphisme & Webdesign' ], required: true },
-    date: { type: Date, default: Date.now },
-});
+
 
 const Formation = mongoose.model("Formation", {
     nom: { type: String, required: true },
@@ -106,6 +179,28 @@ const Presence = mongoose.model("Presence", {
     present: { type: Boolean, required: true },
     formation: { type: mongoose.Schema.Types.ObjectId, ref: 'Formation', required: true }
 });
+
+const Matiere = mongoose.model("Matiere", {
+    id: { type: Number, required: true },
+    matiere: { type: String, required: true },
+    coefficient: { type: Number, required: true },
+    credits: { type: Number, required: true },
+    heure: { type: Number, required: true },
+    formation: { type: String, enum: ['Ressources humaines', 'Marketing & Communication', 'Business & Management', 'Banque, Finance & Immobilier', 'Informatique & Web','Langues Étrangères', 'Graphisme & Webdesign' ], required: true },
+    date: { type: Date, default: Date.now },
+});
+const Note = mongoose.model("Note", {
+    eleveId: { type: mongoose.Schema.Types.ObjectId, ref: 'Eleve', required: true },
+    formationId: { type: String, required: true },
+    matiereId: { type: mongoose.Schema.Types.ObjectId, ref: 'Matiere', required: true },
+    ds: { type: Number, default: 0 },
+    examen: { type: Number, default: 0 },
+    tp: { type: Number, default: 0 }
+});
+
+
+
+
 
 // Routes
 app.post('/ajouterchapitre', upload.single('cours_pdf'), async (req, res) => {
@@ -215,6 +310,7 @@ app.get('/tousleseleves', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération des élèves' });
     }
 });
+
 
 
 app.post('/ajouterenseignant', async (req, res) => {
@@ -375,10 +471,39 @@ app.post('/modifiermatiere', async (req, res) => {
 
 
 // API pour obtenir tous les matières
-app.get('/touslesmatieres', async (req, res) => {
+app.get('/touslesmatieres',async (req, res) => {
     let matieres = await Matiere.find({});
     res.send(matieres);
 });
+
+app.get('/matieres', async (req, res) => {
+    const formation = req.query.formation;
+    try {
+        const matieres = await Matiere.find({ formation });
+        res.json(matieres);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des matières:', error);
+        res.status(500).send('Erreur lors de la récupération des matières');
+    }
+});
+
+// Fetch unique formations
+app.get('/formations', async (req, res) => {
+    try {
+        // Récupère toutes les matières
+        const matieres = await Matiere.find();
+        
+        // Extrait les formations uniques
+        const formations = [...new Set(matieres.map(matiere => matiere.formation))];
+        
+        // Renvoie les formations en réponse
+        res.json(formations);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des formations depuis les matières:', error);
+        res.status(500).json({ error: 'Erreur lors de la récupération des formations depuis les matières' });
+    }
+});
+
 
 
 app.post('/savePresence', async (req, res) => {
@@ -405,7 +530,9 @@ app.post('/savePresence', async (req, res) => {
     }
 });
 
+
 // API pour obtenir les présences par formation
+
 app.get('/presences-par-formation/:formation', async (req, res) => {
     const { formation } = req.params;
     try {
@@ -433,7 +560,6 @@ app.get('/presences-par-formation/:formation', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération des présences' });
     }
 });
-
 
 app.get('/touteslespresences', async (req, res) => {
     try {
@@ -472,6 +598,102 @@ app.get('/touteslespresences', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération des présences' });
     }
 });
+
+// les notes
+
+// Sauvegarder ou mettre à jour les notes
+app.post('/saveNotes', async (req, res) => {
+    console.log('Requête reçue:', req.body);
+    const { notes } = req.body;
+
+    if (!notes || !Array.isArray(notes)) {
+        return res.status(400).send('La liste des notes est requise et doit être un tableau');
+    }
+
+    try {
+        const savedNotes = await Promise.all(notes.map(async note => {
+            const { eleveId, matiereId, ds, examen, tp } = note;
+
+            if (!eleveId || !matiereId || ds === undefined || examen === undefined || tp === undefined) {
+                throw new Error('Données de note incomplètes');
+            }
+
+            const eleve = await Eleve.findById(eleveId);
+            if (!eleve) {
+                throw new Error(`Élève avec ID ${eleveId} non trouvé`);
+            }
+
+            const matiere = await Matiere.findById(matiereId);
+            if (!matiere) {
+                throw new Error(`Matière avec ID ${matiereId} non trouvée`);
+            }
+
+            const formation = matiere.formation; // Get formation from matiere
+
+            // Chercher si une note existe déjà pour cet élève dans cette formation et matière
+            let existingNote = await Note.findOne({ eleveId, formationId: formation, matiereId });
+
+            if (existingNote) {
+                // Mettre à jour la note existante
+                existingNote.ds = ds;
+                existingNote.examen = examen;
+                existingNote.tp = tp;
+                return existingNote.save();
+            } else {
+                // Créer une nouvelle note
+                const newNote = new Note({
+                    eleveId,
+                    formationId: formation,
+                    matiereId,
+                    ds,
+                    examen,
+                    tp
+                });
+                return newNote.save();
+            }
+        }));
+
+        res.json(savedNotes);
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement des notes:', error);
+        res.status(500).send('Erreur interne du serveur');
+    }
+});
+
+
+// Récupérer les notes en fonction de la formation et de la matière
+app.get('/notes', async (req, res) => {
+    const { matiereId } = req.query;
+
+    if (!matiereId) {
+        return res.status(400).send('Le paramètre matiereId est requis');
+    }
+
+    try {
+        const matiere = await Matiere.findById(matiereId);
+        if (!matiere) {
+            return res.status(404).send('Matière non trouvée');
+        }
+
+        const formation = matiere.formation;
+
+        const notes = await Note.find({ formationId: formation, matiereId })
+            .populate({
+                path: 'eleveId',
+                select: 'nom prenom'
+            })
+            .populate({
+                path: 'matiereId',
+                select: 'matiere'
+            });
+        
+        res.json(notes);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des notes:', error);
+        res.status(500).json({ error: 'Erreur lors de la récupération des notes' });
+    }
+});  
+
 
 
 

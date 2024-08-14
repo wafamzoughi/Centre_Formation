@@ -1,0 +1,72 @@
+
+.notes-page {
+    padding: 20px;
+    margin-top: 100px;
+    margin-left: -250px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+.menu-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001; /* Ensure the icon is above other content */
+}
+
+.sidebar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 250px;
+    background-color: white;
+    transition: transform 0.3s ease;
+    margin-top: 10px;
+}
+
+.sidebar-hidden {
+    transform: translateX(-100%);
+}
+
+.sidebar-visible {
+    transform: translateX(0);
+}
+.sidebar-visible + .notes-form {
+    margin-left: 250px; /* Adjust as per your sidebar width */
+}
+
+.sidebar-hidden + .notes-form {
+    margin-left: 0;
+}

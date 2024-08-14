@@ -14,6 +14,7 @@ import InformatiqueWeb from "../../Components/Formations/InformatiqueWeb/Informa
 import GraphismeWebdesign from "../../Components/Formations/GraphismeWebdesign/GraphismeWebdesign";
 import LanguesEtrangeres from "../../Components/Formations/LanguesEtrangeres/LanguesEtrangeres";
 import PresencesEleves from "../../Components/PresencesEleves/PresencesEleves";
+import NotesEleves from "../../Components/NotesEleves/NotesEleves";
 
 
 const Administration = () => {
@@ -27,7 +28,7 @@ const Administration = () => {
                     <Route path="/Formations" element={<Formations />} />
                     <Route path="/Personnels" element={<Personnels />}/>
                     <Route path="/Enseignants"  element={<Enseignants />}/>
-                    <Route path="/Notes" />
+                    <Route path="/Notes" element={<NotesEleves/>}/>
                     <Route path="/Presences" element={<PresencesEleves/>}  />
                     <Route path="/ressources-humaines"  element={<Ressourceshumaines />} />
                     <Route path="/marketing-&-communication"  element={<MarketingCommunication />} />

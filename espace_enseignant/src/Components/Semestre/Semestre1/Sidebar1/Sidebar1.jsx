@@ -34,7 +34,7 @@ const Sidebar1 = () => {
                     <p>Devoirs</p>
                 </div>
             </Link>
-            <Link to={'/presences'} style={{textDecoration:"none"}}>
+            <Link to={'/présences'} style={{textDecoration:"none"}}>
                 <div className="sidebar-item">
                 <img  src={presences} alt="" width="35" className="image" />
                     <p>Presénces</p>

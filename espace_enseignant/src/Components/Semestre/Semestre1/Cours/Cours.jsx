@@ -2,24 +2,35 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Cours.css';
 import menuIcon from '../../../../assets/menu-icon.png';
-import PDF from'../../../../assets/pdf.png'
+import PDF from '../../../../assets/pdf.png';
 import Sidebar1 from '../Sidebar1/Sidebar1';
 
 const Cours = () => {
     const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarVisible(!isSidebarVisible);
-    };
-
     const [chapterNumber, setChapterNumber] = useState('');
     const [chapterName, setChapterName] = useState('');
     const [courseFile, setCourseFile] = useState(null);
     const [subjectName, setSubjectName] = useState('');
     const [subjects, setSubjects] = useState([]);
     const [chapters, setChapters] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:4000/utilisateur', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setUser(response.data);
+                setSubjectName(response.data.specialite);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des informations de l\'utilisateur:', error);
+            }
+        };
+
         const fetchSubjects = async () => {
             try {
                 const response = await axios.get('http://localhost:4000/touslesmatieres');
@@ -38,6 +49,7 @@ const Cours = () => {
             }
         };
 
+        fetchUserData();
         fetchSubjects();
         fetchChapters();
     }, []);
@@ -50,13 +62,14 @@ const Cours = () => {
         formData.append('nom_matiere', subjectName);
 
         try {
+            const token = localStorage.getItem('token');
             const response = await axios.post('http://localhost:4000/ajouterchapitre', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
-            // Ajouter le chapitre à la liste des chapitres
             const newChapter = response.data;
             setChapters([...chapters, newChapter]);
 
@@ -68,27 +81,33 @@ const Cours = () => {
         setChapterNumber('');
         setChapterName('');
         setCourseFile(null);
-        setSubjectName('');
     };
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
+
+    // Filtrer les chapitres selon la spécialité de l'utilisateur
+    const filteredChapters = chapters.filter(chapter => chapter.nom_matiere === user?.specialite);
 
     return (
         <div className="semestre-wrapper">
             <img src={menuIcon} alt="menu icon" className="menu-icon" onClick={toggleSidebar} />
             <div className={`sidebar ${isSidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
-                <Sidebar1/>
+                <Sidebar1 />
             </div>
             <div className="cours-form">
                 <div className="header">
-                    <h2>Gestion du personnel</h2>
-                    <p>Accueil/Semestre 1/cours/Gestion du personnel</p>
+                    {user && <h2>{user.specialite}</h2>}
+                    <p>Accueil/Semestre 1/cours/{user?.specialite}</p>
                 </div>
                 <div className="content-sections">
                     <div className="content-left">
                         <h3>Centre du formation </h3>
                         <p>MY-ACADEMIE</p>
-                        <p>Gestion du personnel</p>
+                        <p>{user?.specialite}</p>
                         <p>Année universitaire 2024-2025</p>
-                        <p>Enseignant: Mme.Wafa Mzoughi</p>
+                        <p>Enseignant: Mme.{user?.nom} {user?.prenom}</p>
                         
                         <div className="container">
                             <h1>Ajouter un Chapitre</h1>
@@ -142,7 +161,7 @@ const Cours = () => {
                         </div>
                         <div className="published-chapters">
                             <h2>Chapitres publiés:</h2>
-                            {chapters.map((chapter, index) => (
+                            {filteredChapters.map((chapter, index) => (
                                 <div key={index}>
                                     <h1>Chapitre {chapter.num_chap}: {chapter.nom_chap}</h1>
                                     <h3>Ressource:</h3>

@@ -6,8 +6,9 @@ import modif_icon from '../../assets/modif_icon.png';
 
 const Matieres = ({ formationFilter }) => {
     const [formVisible, setFormVisible] = useState(false);
+    const [formations, setFormations] = useState([]);
     const [formData, setFormData] = useState({
-        id: '',
+        _id: '', // Utilisez _id pour correspondre avec votre backend
         matiere: '',
         coefficient: '',
         credits: '',
@@ -19,6 +20,7 @@ const Matieres = ({ formationFilter }) => {
 
     useEffect(() => {
         fetchMatieres();
+        fetchFormations();
     }, []);
 
     const fetchMatieres = async () => {
@@ -27,6 +29,15 @@ const Matieres = ({ formationFilter }) => {
             setTableData(response.data);
         } catch (error) {
             console.error('Erreur lors de la récupération des matières', error);
+        }
+    };
+
+    const fetchFormations = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/touteslesformations');
+            setFormations(response.data);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des formations', error);
         }
     };
 
@@ -42,42 +53,43 @@ const Matieres = ({ formationFilter }) => {
         e.preventDefault();
         try {
             if (isEditing) {
-                await axios.post('http://localhost:4000/modifiermatiere', formData);
+                await axios.put(`http://localhost:4000/modifiermatiere/${formData._id}`, formData);
             } else {
                 const response = await axios.post('http://localhost:4000/ajoutermatiere', formData);
                 setTableData([...tableData, response.data]);
             }
-            setFormData({
-                id: '',
-                matiere: '',
-                coefficient: '',
-                credits: '',
-                heure: '',
-                formation: '',
-            });
-            setFormVisible(false);
-            setIsEditing(false);
+            resetForm();
             fetchMatieres();
         } catch (error) {
             console.error('Erreur lors de l\'ajout ou de la modification d\'une matière', error);
         }
     };
 
-    const suppMatiere = async (id) => {
-        await fetch('http://localhost:4000/supprimermatiere', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: id }),
+    const resetForm = () => {
+        setFormData({
+            _id: '',
+            matiere: '',
+            coefficient: '',
+            credits: '',
+            heure: '',
+            formation: '',
         });
-        fetchMatieres();
+        setFormVisible(false);
+        setIsEditing(false);
+    };
+
+    const suppMatiere = async (id) => {
+        try {
+            await axios.delete(`http://localhost:4000/supprimermatiere/${id}`);
+            fetchMatieres();
+        } catch (error) {
+            console.error('Erreur lors de la suppression de la matière', error);
+        }
     };
 
     const handleEditClick = (matiere) => {
         setFormData({
-            id: matiere.id,
+            _id: matiere._id, // Assurez-vous que cela correspond à votre backend
             matiere: matiere.matiere,
             coefficient: matiere.coefficient,
             credits: matiere.credits,
@@ -148,16 +160,15 @@ const Matieres = ({ formationFilter }) => {
                             disabled={isEditing}
                         >
                             <option value="">Sélectionner</option>
-                            <option value="Ressources humaines">Ressources humaines</option>
-                            <option value="Marketing & Communication">Marketing & Communication</option>
-                            <option value="Business & Management">Business & Management</option>
-                            <option value="Banque, Finance & Immobilier">Banque, Finance & Immobilier</option>
-                            <option value="Informatique & Web">Informatique & Web</option>
-                            <option value="Langues Étrangères">Langues Étrangères</option>
-                            <option value="Graphisme & Webdesign">Graphisme & Webdesign</option>
+                            {formations.map((formation) => (
+                                <option key={formation._id} value={formation.nom}>
+                                    {formation.nom}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <button type="submit">{isEditing ? 'Modifier' : 'Enregistrer'}</button>
+                    <button type="button" onClick={resetForm}>Annuler</button>
                 </form>
             )}
             <table>
@@ -179,7 +190,7 @@ const Matieres = ({ formationFilter }) => {
                             <td>{item.heure}</td>
                             <td>
                                 <img
-                                    onClick={() => suppMatiere(item.id)}
+                                    onClick={() => suppMatiere(item._id)}
                                     src={supp_icon}
                                     alt="Supprimer"
                                     className="icon"

@@ -20,7 +20,7 @@
     width: 250px;
     background-color: white;
     transition: transform 0.3s ease;
-    margin-top: 10px;
+    
 }
 
 .sidebar-hidden {
