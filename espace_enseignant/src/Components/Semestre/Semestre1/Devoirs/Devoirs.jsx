@@ -93,7 +93,7 @@ const Devoirs = () => {
             <div className="devoirs-form">
                 <div className="header">
                     {user && <h2>{user.specialite}</h2>}
-                    <p>Accueil/Semestre 1/Devoirs</p>
+                    <p>Accueil/Semestre 1/Devoirs/{user?.specialite}</p>
                 </div>
                 <div className="content-sections">
                     <div className="content-left">
@@ -135,12 +135,15 @@ const Devoirs = () => {
                             </form>
                         </div>
                         <div className="published-assignments">
-                            <h2>Devoirs publiés:</h2>
+                            <h2>Devoirs publiés :</h2>
                             {filteredAssignments.map((assignment, index) => (
                                 <div key={index}>
-                                    <h3>Devoir:</h3>
+                                    <h3>Devoirs :</h3>
                                     <img src={PDF} alt='pdf' width='20px' />
-                                    <a href={`http://localhost:4000${assignment.devoir_pdf}`} download>Devoir {assignment.nom_matiere}</a>
+                                    <a href={`http://localhost:4000${assignment.devoir_pdf}`} download>
+                                        Devoir {assignment.nom_matiere}
+                                    </a>
+
                                 </div>
                             ))}
                         </div>

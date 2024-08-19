@@ -89,7 +89,7 @@ app.get('/utilisateur', authMiddleware, async (req, res) => {
     }
 });
 
-// Configuration de Multer pour le stockage des fichiers
+// Configure multer storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -102,18 +102,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Modèles Mongoose
-const Chapitre = mongoose.model("Chapitre", {
-    num_chap: { type: Number, required: true },
-    nom_chap: { type: String, required: true },
-    cours_pdf: { type: String },
-    nom_matiere: { type: String, required: true },
-});
 
-const Devoir = mongoose.model("Devoir", {
-    devoir_pdf: { type: String },
-    nom_matiere: { type: String, required: true },
-});
 
 const Eleve = mongoose.model("Eleve", {
     nom: String,
@@ -150,7 +142,15 @@ const Enseignant = mongoose.model("Enseignant",{
     date: { type: Date, default: Date.now },
 });
 
-
+const Matiere = mongoose.model("Matiere", {
+    id: { type: Number, required: true },
+    matiere: { type: String, required: true },
+    coefficient: { type: Number, required: true },
+    credits: { type: Number, required: true },
+    heure: { type: Number, required: true },
+    formation: { type: String, enum: ['Ressources humaines', 'Marketing & Communication', 'Business & Management', 'Banque, Finance & Immobilier', 'Informatique & Web','Langues Étrangères', 'Graphisme & Webdesign' ], required: true },
+    date: { type: Date, default: Date.now },
+});
 
 const Personnel = mongoose.model("Personnel", {
     _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
@@ -180,15 +180,7 @@ const Presence = mongoose.model("Presence", {
     formation: { type: mongoose.Schema.Types.ObjectId, ref: 'Formation', required: true }
 });
 
-const Matiere = mongoose.model("Matiere", {
-    id: { type: Number, required: true },
-    matiere: { type: String, required: true },
-    coefficient: { type: Number, required: true },
-    credits: { type: Number, required: true },
-    heure: { type: Number, required: true },
-    formation: { type: String, enum: ['Ressources humaines', 'Marketing & Communication', 'Business & Management', 'Banque, Finance & Immobilier', 'Informatique & Web','Langues Étrangères', 'Graphisme & Webdesign' ], required: true },
-    date: { type: Date, default: Date.now },
-});
+
 const Note = mongoose.model("Note", {
     eleveId: { type: mongoose.Schema.Types.ObjectId, ref: 'Eleve', required: true },
     formationId: { type: String, required: true },
@@ -199,7 +191,17 @@ const Note = mongoose.model("Note", {
 });
 
 
+const Chapitre = mongoose.model("Chapitre", {
+    num_chap: { type: Number, required: true },
+    nom_chap: { type: String, required: true },
+    cours_pdf: { type: String },
+    nom_matiere: { type: String, required: true },
+});
 
+const Devoir = mongoose.model("Devoir", {
+    devoir_pdf: { type: String },
+    nom_matiere: { type: String, required: true },
+});
 
 
 // Routes
@@ -231,9 +233,12 @@ app.get('/tousleschapitres', async (req, res) => {
     }
 });
 
+
+
 app.post('/ajouterdevoir', upload.single('devoir_pdf'), async (req, res) => {
     const { nom_matiere } = req.body;
-    const devoir_pdf = req.file ? `/uploads/devoirs/${req.file.filename}` : null;
+    const devoir_pdf = req.file ? `/uploads/${req.file.filename}` : null;
+
 
     const devoir = new Devoir({
         devoir_pdf,
@@ -694,6 +699,55 @@ app.get('/notes', async (req, res) => {
     }
 });  
 
+app.get('/formations-with-teachers', async (req, res) => {
+    try {
+        // Fetch data from Matiere and join with Enseignant
+        const formations = await Matiere.aggregate([
+            {
+                $lookup: {
+                    from: "enseignants",
+                    localField: "specialite",  // Field in Matiere
+                    foreignField: "specialite", // Field in Enseignant
+                    as: "enseignants" // Output array field
+                }
+            },
+            {
+                $group: {
+                    _id: "$formation",
+                    matieres: {
+                        $push: {
+                            matiere: "$matiere",
+                            
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "formations",
+                    localField: "_id",
+                    foreignField: "nom",
+                    as: "formationDetails"
+                }
+            },
+            {
+                $unwind: "$formationDetails"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    formation: "$formationDetails.nom",
+                    matieres: 1
+                }
+            }
+        ]);
+
+        res.json(formations);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Une erreur s\'est produite lors de la récupération des données' });
+    }
+});
 
 
 

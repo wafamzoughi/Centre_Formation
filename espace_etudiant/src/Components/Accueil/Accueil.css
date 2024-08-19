@@ -1,0 +1,23 @@
+.accueil{
+    margin-top: 100px;
+    margin-left: 230px;
+}
+.formationn {
+    margin-bottom: 20px;
+    width: 98%;
+    text-align: left;
+}
+
+.matiere {
+    padding-left: 20px;
+    margin-bottom: 10px;
+}
+
+.matiere ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.matiere li {
+    margin-bottom: 5px;
+}

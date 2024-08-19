@@ -1,7 +1,7 @@
-.semestre-wrapper {
+.semestre-wrapper2 {
     display: flex;
-    margin-left: -245px;
-    
+    padding-left: 0px;
+    padding-top: 0px;
 }
 
 .menu-icon {
@@ -21,7 +21,7 @@
     width: 250px;
     background-color: white;
     transition: transform 0.3s ease;
-    
+    margin-top: 10px;
 }
 
 .sidebar-hidden {
@@ -32,7 +32,7 @@
     transform: translateX(0);
 }
 
-.cours-form {
+.devoirs-form {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -41,11 +41,11 @@
     margin-right: 5px;
 }
 
-.sidebar-visible + .cours-form {
+.sidebar-visible + .devoirs-form {
     margin-left: 250px; /* Adjust as per your sidebar width */
 }
 
-.sidebar-hidden + .cours-form {
+.sidebar-hidden + .devoirs-form {
     margin-left: 0;
 }
 
@@ -70,13 +70,6 @@
     border-radius: 8px;
 }
 
-.content-right {
-    flex: 1; /* Smaller column */
-    background-color: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
 
 input[type="text"] {
     width: 100%;
@@ -138,7 +131,7 @@ select {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 50%;
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -155,11 +148,18 @@ button {
 button:hover {
     background-color: #0056b3;
 }
-.published-chapters h3{
-    
-    color:brown ;
-}
-.published-chapters h2 {
+
+.published-assignments h2 {
     color: #555;
     text-decoration: underline;
+}
+
+.published-assignments div {
+    margin-bottom: 20px;
+}
+
+.published-assignments h3{
+    
+    color:brown ;
+    margin: 10px 0;
 }
