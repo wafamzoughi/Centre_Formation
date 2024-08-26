@@ -1,16 +1,18 @@
 .accueil{
     margin-top: 100px;
-    margin-left: 230px;
+    margin-left: 250px;
 }
 .formationn {
     margin-bottom: 20px;
     width: 98%;
     text-align: left;
+    color: rgb(140, 95, 10);
 }
 
 .matiere {
     padding-left: 20px;
     margin-bottom: 10px;
+    color: rgb(13, 113, 179);
 }
 
 .matiere ul {
@@ -20,4 +22,9 @@
 
 .matiere li {
     margin-bottom: 5px;
+}
+.Catégoriesdecours{
+    color: rgb(110, 82, 13);
+    text-decoration-line: underline;
+    text-align: center;
 }

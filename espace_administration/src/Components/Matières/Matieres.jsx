@@ -157,7 +157,7 @@ const Matieres = ({ formationFilter }) => {
                             value={formData.formation}
                             onChange={handleInputChange}
                             required
-                            disabled={isEditing}
+                            
                         >
                             <option value="">Sélectionner</option>
                             {formations.map((formation) => (

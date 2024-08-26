@@ -12,13 +12,14 @@
 }
 .form-page{
     margin-top: 100px;
-    margin-left: 230px;
+    margin-left: 250px;
+    padding-right: 0px;
 }
 
 button {
     margin-bottom: 20px;
     padding: 10px 20px;
-    background-color: #9bc9fa;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -26,7 +27,7 @@ button {
 }
 
 button:hover {
-    background-color: #007bff;
+    background-color: #075cb6;
 }
 
 .form {

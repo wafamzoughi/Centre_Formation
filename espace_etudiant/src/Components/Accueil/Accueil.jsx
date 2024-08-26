@@ -24,7 +24,7 @@ const Accueil = () => {
         <div>
             <Sidebar />
             <div className="accueil">
-                <h2>Catégories de cours</h2>
+                <h1 className='Catégoriesdecours'>Catégories de cours</h1>
                 {matieres.map((formation, index) => (
                     <div key={index} className="formationn">
                         <h3>{formation.formation}</h3>
@@ -32,7 +32,7 @@ const Accueil = () => {
                             <div key={matiereIndex} className="matiere">
                                 <Link
                                     to={`/semestre?matiere=${encodeURIComponent(matiere.matiere)}`}
-                                    className="matiere-link"
+                                    className="matiere-link" style={{textDecoration:"none"}}
                                 >
                                     <strong>{matiere.matiere}</strong>
                                 </Link>

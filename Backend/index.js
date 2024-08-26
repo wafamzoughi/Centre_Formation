@@ -177,7 +177,8 @@ const Presence = mongoose.model("Presence", {
     eleveId: { type: mongoose.Schema.Types.ObjectId, ref: 'Eleve', required: true },
     date: { type: Date, required: true },
     present: { type: Boolean, required: true },
-    formation: { type: mongoose.Schema.Types.ObjectId, ref: 'Formation', required: true }
+    formation: { type: mongoose.Schema.Types.ObjectId, ref: 'Formation', required: true },
+    matiere: { type: mongoose.Schema.Types.ObjectId, ref: 'Matiere', required: true },
 });
 
 
@@ -509,95 +510,133 @@ app.get('/formations', async (req, res) => {
     }
 });
 
-
-
-app.post('/savePresence', async (req, res) => {
-    const { presence } = req.body;
+// Example route to get presence by date
+app.get('/presence/:date', async (req, res) => {
+    const { date } = req.params;
     try {
-        const savedPresences = await Promise.all(presence.map(async record => {
-            const eleve = await Eleve.findOne({ nom: record.eleveNom, prenom: record.elevePrenom });
-            if (!eleve) {
-                throw new Error(`Élève avec nom ${record.eleveNom} et prénom ${record.elevePrenom} non trouvé`);
-            }
-            const formation = await Formation.findOne({ nom: record.formationNom });
-            if (!formation) {
-                throw new Error(`Formation avec nom ${record.formationNom} non trouvée`);
-            }
-            return await Presence.findOneAndUpdate(
-                { eleveId: eleve._id, date: record.date },
-                { eleveId: eleve._id, date: record.date, present: record.present, formation: formation._id },
-                { upsert: true, new: true }
-            );
-        }));
-        res.json(savedPresences);
+        const presenceRecords = await Presence.find({ date: new Date(date) })
+            .populate('eleveId', 'nom prenom')
+            .populate('formation', 'nom')
+            .populate('matiere', 'matiere');
+        res.json(presenceRecords);
     } catch (error) {
-        res.status(500).json({ error: 'Erreur lors de l\'enregistrement de l\'assiduité' });
+        res.status(500).json({ error: 'Erreur lors de la récupération de l\'assiduité' });
+    }
+});
+
+app.get('/touslespresences', async (req, res) => {
+    const { formation, matiere } = req.query;
+
+    try {
+        const formationObj = await Formation.findOne({ nom: formation });
+        const matiereObj = await Matiere.findById(matiere);
+
+        if (!formationObj || !matiereObj) {
+            return res.status(404).json({ message: 'Formation or Matière not found' });
+        }
+
+        const presences = await Presence.find({
+            formation: formationObj._id,
+            matiere: matiereObj._id,
+        }).populate('eleveId');
+
+        res.json(presences);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching presences' });
     }
 });
 
 
-// API pour obtenir les présences par formation
+app.post('/savePresence', async (req, res) => {
+    const { presence } = req.body;
 
+    if (!presence || !Array.isArray(presence)) {
+        return res.status(400).send('La liste des présences est requise et doit être un tableau');
+    }
+
+    try {
+        const savedPresences = await Promise.all(presence.map(async record => {
+            const { eleveNom, elevePrenom, formationNom, matiereNom, date, present } = record;
+
+            if (!eleveNom || !elevePrenom || !formationNom || !matiereNom || !date || present === undefined) {
+                console.error('Données de présence reçues:', presence);
+                throw new Error('Données de présence incomplètes');
+            }
+
+            // Find the student
+            const eleve = await Eleve.findOne({ nom: eleveNom, prenom: elevePrenom });
+            if (!eleve) {
+                console.error(`Élève non trouvé: ${eleveNom} ${elevePrenom}`);
+                throw new Error(`Élève non trouvé: ${eleveNom} ${elevePrenom}`);
+            }
+
+            // Find the formation
+            const formation = await Formation.findOne({ nom: formationNom });
+            if (!formation) {
+                console.error(`Formation non trouvée: ${formationNom}`);
+                throw new Error(`Formation non trouvée: ${formationNom}`);
+            }
+
+            // Find the subject
+            const matiere = await Matiere.findById(matiereNom);
+            if (!matiere) {
+                console.error(`Matière non trouvée: ${matiereNom}`);
+                throw new Error(`Matière non trouvée: ${matiereNom}`);
+            }
+
+            // Check for existing presence
+            let existingPresence = await Presence.findOne({ eleveId: eleve._id, date });
+            if (existingPresence) {
+                existingPresence.present = present;
+                existingPresence.formation = formation._id;
+                existingPresence.matiere = matiere._id;
+                return existingPresence.save();
+            } else {
+                const newPresence = new Presence({
+                    eleveId: eleve._id,
+                    date,
+                    present,
+                    formation: formation._id,
+                    matiere: matiere._id
+                });
+                return newPresence.save();
+            }
+        }));
+
+        res.json(savedPresences);
+    } catch (error) {
+        console.error('Erreur lors de l\'enregistrement de l\'assiduité:', error); // Log the entire error
+        res.status(500).send('Erreur interne du serveur');
+    }
+});
+
+
+
+
+
+
+// API pour obtenir les présences par formation
 app.get('/presences-par-formation/:formation', async (req, res) => {
     const { formation } = req.params;
     try {
-        // Trouver l'objet Formation correspondant au nom donné
         const formationObj = await Formation.findOne({ nom: formation });
         if (!formationObj) {
             return res.status(404).json({ error: 'Formation non trouvée' });
         }
 
-        // Trouver les enregistrements de présence pour cette formation
         const presenceRecords = await Presence.find({ formation: formationObj._id })
             .populate('eleveId', 'nom prenom')
-            .populate('formation', 'nom');
+            .populate('formation', 'nom')
+            .populate('matiere', 'matiere'); // Populate matiere field
 
-        // Formater les données de présence
         const formattedPresences = presenceRecords.map(record => ({
             date: record.date.toISOString().split('T')[0],
             nom: record.eleveId.nom,
             prenom: record.eleveId.prenom,
+            matiere: record.matiere.matiere, // Include matiere in the response
             present: record.present
         }));
 
-        res.json(formattedPresences);
-    } catch (error) {
-        res.status(500).json({ error: 'Erreur lors de la récupération des présences' });
-    }
-});
-
-app.get('/touteslespresences', async (req, res) => {
-    try {
-        const { date } = req.query; // Obtient la date depuis la requête
-        let query = {};
-        
-        if (date) {
-            // Filtre par date si elle est fournie
-            query.date = new Date(date);
-        }
-        
-        const presences = await Presence.find(query)
-            .populate('eleveId', 'nom prenom')
-            .populate('formation', 'nom');
-        
-        // Organiser les présences par formation et date
-        const formattedPresences = presences.reduce((acc, record) => {
-            const formation = record.formation.nom;
-            const recordDate = record.date.toISOString().split('T')[0];
-            if (!acc[formation]) {
-                acc[formation] = {};
-            }
-            if (!acc[formation][recordDate]) {
-                acc[formation][recordDate] = [];
-            }
-            acc[formation][recordDate].push({
-                nom: record.eleveId.nom,
-                prenom: record.eleveId.prenom,
-                present: record.present
-            });
-            return acc;
-        }, {});
-        
         res.json(formattedPresences);
     } catch (error) {
         res.status(500).json({ error: 'Erreur lors de la récupération des présences' });
@@ -665,39 +704,25 @@ app.post('/saveNotes', async (req, res) => {
     }
 });
 
+// Fetch notes by formation and matiere
 
-// Récupérer les notes en fonction de la formation et de la matière
-app.get('/notes', async (req, res) => {
-    const { matiereId } = req.query;
-
-    if (!matiereId) {
-        return res.status(400).send('Le paramètre matiereId est requis');
-    }
+app.get('/notes-par-formation-et-matiere', async (req, res) => {
+    const { formation, matiereId } = req.query;
 
     try {
-        const matiere = await Matiere.findById(matiereId);
-        if (!matiere) {
-            return res.status(404).send('Matière non trouvée');
-        }
-
-        const formation = matiere.formation;
-
         const notes = await Note.find({ formationId: formation, matiereId })
-            .populate({
-                path: 'eleveId',
-                select: 'nom prenom'
-            })
-            .populate({
-                path: 'matiereId',
-                select: 'matiere'
-            });
-        
+            .populate('eleveId', 'nom prenom'); // Peupler les champs nom et prenom
+
+        // Vérifiez ce que vous récupérez
+        console.log(notes); // Ajoutez cette ligne pour voir les notes récupérées
+
         res.json(notes);
     } catch (error) {
         console.error('Erreur lors de la récupération des notes:', error);
-        res.status(500).json({ error: 'Erreur lors de la récupération des notes' });
+        res.status(500).send('Erreur serveur');
     }
-});  
+});
+
 
 app.get('/formations-with-teachers', async (req, res) => {
     try {
@@ -749,8 +774,65 @@ app.get('/formations-with-teachers', async (req, res) => {
     }
 });
 
+//Dashboard 
+app.get('/personnel-stats', async (req, res) => {
+    try {
+      const personnelStats = await Personnel.aggregate([
+        {
+          $group: {
+            _id: "$typePersonnel",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            typePersonnel: "$_id",
+            count: 1,
+            _id: 0
+          }
+        }
+      ]);
+      res.json(personnelStats);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
 
-
+app.get('/formation-stats', async (req, res) => {
+    try {
+        const formationStats = await Eleve.aggregate([
+        {
+          $unwind: "$formations"
+        },
+        {
+          $group: {
+            _id: "$formations",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $lookup: {
+            from: "formations",
+            localField: "_id",
+            foreignField: "_id",
+            as: "formationDetails"
+          }
+        },
+        {
+          $project: {
+            formation: { $arrayElemAt: ["$formationDetails.nom", 0] },
+            count: 1,
+            _id: 0
+          }
+        }
+      ]);
+      res.json(formationStats);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+  
+  
 
 app.listen(port, () => {
     console.log(`Serveur backend démarré sur le port ${port}`);

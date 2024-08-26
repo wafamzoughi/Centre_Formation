@@ -4,17 +4,7 @@ import Sidebar1 from '../Sidebar1/Sidebar1';
 import menuIcon from '../../../../assets/menu-icon.png';
 import './Presences.css';
 
-const formationsList = [
-    'Informatique & Web',
-    'Ressources humaines',
-    'Marketing & Communication',
-    'Business & Management',
-    'Banque, Finance & Immobilier',
-    'Langues Étrangères',
-    'Graphisme & Webdesign'
-];
-
-const Presence = () => {
+const Presences = () => {
     const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
     const toggleSidebar = () => {
@@ -24,13 +14,56 @@ const Presence = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [eleves, setEleves] = useState([]);
     const [attendance, setAttendance] = useState({});
-    const [formation, setFormation] = useState(formationsList[0]);
+    const [formations, setFormations] = useState([]);
+    const [formation, setFormation] = useState('');
+    const [matieres, setMatieres] = useState([]);
+    const [matiere, setMatiere] = useState('');
+    const [loadingMatieres, setLoadingMatieres] = useState(false);
+    
+    useEffect(() => {
+        fetchFormations();
+    }, []);
 
     useEffect(() => {
-        fetchEleves();
-        fetchAttendance();
-    }, [date, formation]);
+        if (formation) {
+            fetchMatieres();
+        }
+    }, [formation]);
 
+    useEffect(() => {
+        if (matiere) {
+            fetchEleves();
+            fetchAttendance();
+        }
+    }, [date, formation, matiere]);
+    const fetchFormations = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/formations');
+            setFormations(response.data);
+            if (response.data.length > 0) {
+                setFormation(response.data[0]); // Sélectionner la première formation par défaut
+            }
+        } catch (error) {
+            console.error('Erreur lors de la récupération des formations depuis les matières', error);
+        }
+    };
+    const fetchMatieres = async () => {
+        setLoadingMatieres(true);
+        try {
+            const response = await axios.get('http://localhost:4000/matieres', {
+                params: { formation }
+            });
+            setMatieres(response.data);
+            if (response.data.length > 0) {
+                setMatiere(response.data[0]._id); // Sélectionner la première matière par défaut
+            }
+        } catch (error) {
+            console.error('Erreur lors de la récupération des matières', error);
+        } finally {
+            setLoadingMatieres(false);
+        }
+    };
+    
     const fetchEleves = async () => {
         try {
             const response = await axios.get('http://localhost:4000/tousleseleves', {
@@ -68,6 +101,10 @@ const Presence = () => {
         setFormation(e.target.value);
     };
 
+    const handleMatiereChange = (e) => {
+        setMatiere(e.target.value);
+    };
+
     const handleAttendanceChange = (eleveId) => {
         setAttendance(prev => ({
             ...prev,
@@ -77,7 +114,7 @@ const Presence = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const attendanceData = Object.keys(attendance).map(eleveId => {
             const eleve = eleves.find(e => e._id === eleveId);
             return {
@@ -85,15 +122,17 @@ const Presence = () => {
                 elevePrenom: eleve ? eleve.prenom : '',
                 date: new Date().toISOString().split('T')[0],
                 present: attendance[eleveId],
-                formationNom: formation
+                formationNom: formation,
+                matiereNom: matiere || '', // Assurez-vous que matiere est défini ici
             };
         });
-
+        
         try {
             await axios.post('http://localhost:4000/savePresence', { presence: attendanceData });
             alert('Présence enregistrée avec succès');
         } catch (error) {
-            console.error('Erreur lors de l\'enregistrement de l\'assiduité', error);
+            console.log('Données d\'assiduité avant l\'envoi:', attendanceData);
+
         }
     };
 
@@ -114,12 +153,24 @@ const Presence = () => {
                 />
             </div>
             <div>
-                <label>Formation: </label>
-                <select value={formation} onChange={handleFormationChange}>
-                    {formationsList.map((formation, index) => (
-                        <option key={index} value={formation}>{formation}</option>
-                    ))}
-                </select>
+                    <label>Formation: </label>
+                    <select value={formation} onChange={handleFormationChange}>
+                        {formations.map((formation) => (
+                            <option key={formation} value={formation}>{formation}</option>
+                        ))}
+                    </select>
+                </div>
+            <div>
+            <label>Matière: </label>
+                    {loadingMatieres ? (
+                        <p>Chargement des matières...</p>
+                    ) : (
+                        <select value={matiere} onChange={handleMatiereChange}>
+                            {matieres.map((matiere) => (
+                                <option key={matiere._id} value={matiere._id}>{matiere.matiere}</option>
+                            ))}
+                        </select>
+                    )}
             </div>
             <form onSubmit={handleSubmit}>
                 <table>
@@ -151,4 +202,4 @@ const Presence = () => {
     );
 };
 
-export default Presence;
+export default Presences;

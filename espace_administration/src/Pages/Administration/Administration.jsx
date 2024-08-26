@@ -15,15 +15,16 @@ import GraphismeWebdesign from "../../Components/Formations/GraphismeWebdesign/G
 import LanguesEtrangeres from "../../Components/Formations/LanguesEtrangeres/LanguesEtrangeres";
 import PresencesEleves from "../../Components/PresencesEleves/PresencesEleves";
 import NotesEleves from "../../Components/NotesEleves/NotesEleves";
+import Dashboard from "../../Components/Dashboard/Dashboard";
 
 
 const Administration = () => {
     return (
         <div className="administration">
-            <Sidebar />
+            <div><Sidebar /></div>
             <div className="main-content">
                 <Routes>
-                    <Route path="/TableauDeBord"/>
+                    <Route path="/" element={<Dashboard/>}/>
                     <Route path="/Eleves" element={<Eleves />} />
                     <Route path="/Formations" element={<Formations />} />
                     <Route path="/Personnels" element={<Personnels />}/>

@@ -7,50 +7,55 @@ import cours from '../../../../assets/lesson.png'
 import devoirs from '../../../../assets/examen.png'
 import notes from '../../../../assets/note.png'
 import presences from '../../../../assets/absence.png'
-
+import accueil from '../../../../assets/home.png'
 const Sidebar1 = () => {
     
     return(
 
-        <div className="sidebar">
-            
+        <div className="sidebar2">
+            <Link to={'/'} style={{textDecoration:"none"}}>
+                <div className="sidebar2-item">
+                <img src={accueil} alt="" width="35" className="image" />
+                    <strong>Accueil</strong>
+                </div>
+            </Link>
             <Link to={'/semestre-1'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img  src={semestre1} alt="" width="35" className="image" />
-                    <p>Semestre 1</p>
+                    <strong>Semestre 1</strong>
                 </div>
             </Link>
         
             <Link to={'/cours'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img  src={cours} alt="" width="35" className="image" />
-                    <p>Cours</p>
+                    <strong>Cours</strong>
                 </div>
             </Link>
             
             <Link to={'/devoirs'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img   src={devoirs} alt="" width="35" className="image"/>
-                    <p>Devoirs</p>
+                    <strong>Devoirs</strong>
                 </div>
             </Link>
             <Link to={'/présences'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img  src={presences} alt="" width="35" className="image" />
-                    <p>Presénces</p>
+                    <strong>Presénces</strong>
                 </div>
             </Link>
             
             <Link to={'/notes'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img   src={notes} alt="" width="35" className="image"/>
-                    <p>Notes</p>
+                    <strong>Notes</strong>
                 </div>
             </Link>
             <Link to={'/semestre-2'} style={{textDecoration:"none"}}>
-                <div className="sidebar-item">
+                <div className="sidebar2-item">
                 <img   src={semestre2} alt="" width="35" className="image"/>
-                    <p>Semestre 2</p>
+                    <strong>Semestre 2</strong>
                 </div>
             </Link>
             </div>

@@ -11,13 +11,13 @@ const Sidebar = () => {
             <Link to={'/'} style={{textDecoration:"none"}}>
                 <div className="sidebar-item">
                 <img src={accueil} alt="" width="35" />
-                    <p>Accueil</p>
+                    <strong>Accueil</strong>
                 </div>
             </Link>
             <Link to={'/Formations'} style={{textDecoration:"none"}}>
                 <div className="sidebar-item">
                 <img src={formations} alt="" width="35" />   
-                    <p>Formations</p>
+                    <strong>Formations</strong>
                 </div>
             </Link>
             

@@ -7,6 +7,7 @@ import BanqueFinanceImmobilier from '../../assets/Banque, Finance & Immobilier.p
 import InformatiqueWeb from '../../assets/Informatique & Web.png'
 import LanguesEtrangeres from '../../assets/Langues Etrangeres.png'
 import GraphismeWebdesign from '../../assets/Graphisme & Webdesign.png'
+import Sidebar from '../Sidebar/Sidebar';
 const formations = [
     {
         icon: Ressourceshumaines,
@@ -49,6 +50,9 @@ const formations = [
 
 const Formations = () => {
     return (
+        <div>
+            <Sidebar />
+        
         <div className="formations-container">
             {formations.map((formation, index) => (
                 <div key={index} className="formation">
@@ -59,6 +63,7 @@ const Formations = () => {
                     ))}
                 </div>
             ))}
+        </div>
         </div>
     );
 };

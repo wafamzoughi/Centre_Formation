@@ -7,7 +7,7 @@
     width: 100%;
     max-width: 250px;
     height: 100vh;
-    background-color: white;
+    background-color: rgb(243, 237, 229);
 }
 
 .sidebar-item {
@@ -17,7 +17,7 @@
     margin: 0px 20px;
     padding: 5px 10px;
     border-radius: 6px;
-    background-color: rgb(253, 253, 249);
+    background-color: rgb(255, 255, 255);
     gap: 20px;
     cursor: pointer;
 }

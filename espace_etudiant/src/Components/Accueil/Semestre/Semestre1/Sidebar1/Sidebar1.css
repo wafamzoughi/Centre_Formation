@@ -4,7 +4,7 @@
     gap: 15px;
     width: 100%;
     max-width: 250px;
-    background-color: white;
+    background-color: rgb(243, 237, 229);
     transition: transform 0.3s ease;
     height: 230px;
     padding-top: 100px;
@@ -14,7 +14,7 @@
     align-items:flex-start;
     justify-content: flex-start;
     margin: 0px 10px;
-    padding: 0px 10px;
+    padding: 10px;
     border-radius: 6px;
     background-color: rgb(253, 253, 249);
     gap: 20px;
